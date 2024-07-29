@@ -5,6 +5,9 @@ const AmazonScraper = require('../lib');
 const startScraper = async (argv) => {
     argv.scrapeType = argv._[0];
     try {
+        if (argv.scrapeType === 'asin' && argv.id.includes(',')) {
+            argv.id = argv.id.split(',');
+        }
         const data = await AmazonScraper[argv.scrapeType]({ ...argv, cli: true, rating: [argv['min-rating'], argv['max-rating']] });
         switch (argv.scrapeType) {
             case 'countries':
@@ -21,7 +24,7 @@ const startScraper = async (argv) => {
                 break;
             case 'asin':
                 if (!argv.filetype) {
-                    console.log(data.result[0]);
+                    console.log(JSON.stringify(data.result));
                 }
                 break;
             default:
@@ -46,7 +49,7 @@ require('yargs')
     .command('reviews [id]', 'collect reviews from product by using ASIN id', {}, (argv) => {
         startScraper(argv);
     })
-    .command('asin [id]', 'single product details', {}, (argv) => {
+    .command('asin [id]', 'single or multiple product details', {}, (argv) => {
         startScraper(argv);
     })
     .command('categories', 'get list of categories', {}, (argv) => {
